@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .celula {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            background: #f0f0f0;
+            border: 2px solid #000;
+            cursor: pointer;
+        }
+        .celula:hover {
+            background: #ddd;
+        }
+        .mensagem {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Jogo da Velha</h1>
+    <div class="tabuleiro" id="tabuleiro"></div>
+    <div class="mensagem" id="mensagem"></div>
+    <button onclick="reiniciarJogo()">Reiniciar Jogo</button>
+
+    <script>
+        const jogador = "X";
+        const computador = "O";
+        let tabuleiro = ["", "", "", "", "", "", "", "", ""];
+        let jogoAtivo = true;
+
+        function criarTabuleiro() {
+            const tabuleiroDiv = document.getElementById("tabuleiro");
+            tabuleiroDiv.innerHTML = "";
+            tabuleiro.forEach((valor, index) => {
+                const celula = document.createElement("div");
+                celula.classList.add("celula");
+                celula.textContent = valor;
+                celula.addEventListener("click", () => fazerJogada(index));
+                tabuleiroDiv.appendChild(celula);
+            });
+        }
+
+        function fazerJogada(index) {
+            if (tabuleiro[index] === "" && jogoAtivo) {
+                tabuleiro[index] = jogador;
+                atualizarTabuleiro();
+                if (verificarVencedor(jogador)) return;
+                setTimeout(movimentoComputador, 500);
+            }
+        }
+
+        function movimentoComputador() {
+            if (!jogoAtivo) return;
+            let posicoesVazias = tabuleiro
+                .map((valor, index) => (valor === "" ? index : null))
+                .filter((valor) => valor !== null);
+
+            if (posicoesVazias.length > 0) {
+                let escolha = posicoesVazias[Math.floor(Math.random() * posicoesVazias.length)];
+                tabuleiro[escolha] = computador;
+                atualizarTabuleiro();
+                verificarVencedor(computador);
+            }
+        }
+
+        function atualizarTabuleiro() {
+            criarTabuleiro();
+        }
+
+        function verificarVencedor(jogadorAtual) {
+            const combinacoesVitoria = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
+                [0, 4, 8], [2, 4, 6]  // Diagonais
+            ];
+
+            for (const combinacao of combinacoesVitoria) {
+                const [a, b, c] = combinacao;
+                if (tabuleiro[a] === jogadorAtual && tabuleiro[b] === jogadorAtual && tabuleiro[c] === jogadorAtual) {
+                    document.getElementById("mensagem").textContent = `O jogador "${jogadorAtual}" venceu!`;
+                    jogoAtivo = false;
+                    return true;
+                }
+            }
+
+            if (!tabuleiro.includes("")) {
+                document.getElementById("mensagem").textContent = "Empate!";
+                jogoAtivo = false;
+                return true;
+            }
+
+            return false;
+        }
+
+        function reiniciarJogo() {
+            tabuleiro = ["", "", "", "", "", "", "", "", ""];
+            jogoAtivo = true;
+            document.getElementById("mensagem").textContent = "";
+            criarTabuleiro();
+        }
+
+        criarTabuleiro();
+    </script>
+
+</body>
+</html>
